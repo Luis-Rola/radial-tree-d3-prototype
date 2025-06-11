@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Radial Tree D3.js</title>
+  <style>
+    body { margin: 0; font-family: sans-serif; }
+    .node circle { fill: #4a90e2; cursor: pointer; }
+    .node text { font-size: 12px; text-anchor: middle; }
+    .link { fill: none; stroke: #ccc; stroke-width: 1.5px; }
+    .tooltip {
+      position: absolute;
+      text-align: center;
+      padding: 4px 8px;
+      font-size: 12px;
+      background: #fff;
+      border: 1px solid #ccc;
+      pointer-events: none;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <svg id="radialTree" width="100%" height="100%"></svg>
+  <script src="d3.v7.min.js"></script>
+  <script>
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    const radius = (Math.min(width, height) / 2) - 100;
+
+    const svg = d3.select("#radialTree")
+      .attr("viewBox", [-width / 2, -height / 2, width, height])
+      .style("font", "10px sans-serif");
+
+    const tooltip = d3.select("body").append("div")
+      .attr("class", "tooltip")
+      .style("opacity", 0);
+
+    d3.json("data.json").then(data => {
+      const root = d3.hierarchy(data);
+      root.x0 = 0;
+      root.y0 = 0;
+
+      const tree = d3.tree()
+        .size([2 * Math.PI, radius])
+        .separation((a, b) => (a.parent === b.parent ? 1 : 2) / a.depth);
+
+      tree(root);
+
+      const links = root.links();
+      const nodes = root.descendants();
+
+      // Convert to radial coordinates
+      function radialPoint(x, y) {
+        return [y * Math.cos(x - Math.PI / 2), y * Math.sin(x - Math.PI / 2)];
+      }
+
+      svg.append("g")
+        .selectAll("path")
+        .data(links)
+        .join("path")
+        .attr("class", "link")
+        .attr("d", d => {
+          const [sx, sy] = radialPoint(d.source.x, d.source.y);
+          const [tx, ty] = radialPoint(d.target.x, d.target.y);
+          return `M${sx},${sy}C${sx},${(sy + ty) / 2} ${tx},${(sy + ty) / 2} ${tx},${ty}`;
+        });
+
+      const node = svg.append("g")
+        .selectAll("g")
+        .data(nodes)
+        .join("g")
+        .attr("transform", d => {
+          const [x, y] = radialPoint(d.x, d.y);
+          return `translate(${x},${y})`;
+        });
+
+      node.append("circle")
+        .attr("r", 5)
+        .on("mouseover", (event, d) => {
+          tooltip.transition().duration(200).style("opacity", .9);
+          tooltip.html(d.data.name)
+            .style("left", (event.pageX + 10) + "px")
+            .style("top", (event.pageY - 15) + "px");
+        })
+        .on("mouseout", () => {
+          tooltip.transition().duration(300).style("opacity", 0);
+        });
+
+      node.append("text")
+        .attr("dy", "0.31em")
+        .attr("x", d => d.x < Math.PI === !d.children ? 6 : -6)
+        .attr("text-anchor", d => d.x < Math.PI === !d.children ? "start" : "end")
+        .attr("transform", d => `rotate(${d.x * 180 / Math.PI - 90})`)
+        .text(d => d.data.name);
+    });
+  </script>
+</body>
+</html>

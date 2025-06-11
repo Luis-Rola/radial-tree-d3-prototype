@@ -1,0 +1,49 @@
+json
+
+{
+  "name": "Root",
+  "children": [
+    {
+      "name": "Energy",
+      "children": [
+        { "name": "Electricity" },
+        { "name": "Fuel" },
+        { "name": "Cooling" }
+      ]
+    },
+    {
+      "name": "Transport",
+      "children": [
+        { "name": "Air Travel" },
+        { "name": "Sea Travel" },
+        { "name": "Road Travel" },
+        { "name": "Rail Freight" }
+      ]
+    },
+    {
+      "name": "Consumer Goods",
+      "children": [
+        { "name": "Retail" },
+        { "name": "Food" },
+        { "name": "Textiles" },
+        { "name": "Healthcare" }
+      ]
+    },
+    {
+      "name": "Waste",
+      "children": [
+        { "name": "Plastic Waste" },
+        { "name": "Metal Waste" },
+        { "name": "Organic Waste" }
+      ]
+    },
+    {
+      "name": "Agriculture",
+      "children": [
+        { "name": "Farming" },
+        { "name": "Fishing" },
+        { "name": "Forestry" }
+      ]
+    }
+  ]
+}
